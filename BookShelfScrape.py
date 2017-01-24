@@ -64,7 +64,7 @@ with requests.Session() as s:
                     title = soupReading.find('title').text
                     title = " ".join(re.findall("[a-zA-Z]+", title))
                     # Grabbing all of the blue boxes which are denoted by "figure" in the HTML
-                    # Trying to also save them off as word documents, with both text and tables
+                    # Trying to also save them off as HTML documents, with text, tables, and images
                     figures = soupReading.findAll("figure", {"class": "example"})
                     if len(figures) >= 1:
                         readingFile = open('%s.html' % title, 'wb')
