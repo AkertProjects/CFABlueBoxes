@@ -1,7 +1,7 @@
 #! Python
 # Goes to bookshelf and downloads blue box questions from the CFA textbooks
 
-import requests, json, re, pandas, os
+import requests, json, re, os
 from bs4 import BeautifulSoup
 from docx import Document
 
