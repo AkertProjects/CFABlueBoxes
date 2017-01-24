@@ -3,7 +3,6 @@
 
 import requests, json, re, os
 from bs4 import BeautifulSoup
-from docx import Document
 
 username = input('Please type in your E-mail: ')
 password = input('Please type in your password: ')
