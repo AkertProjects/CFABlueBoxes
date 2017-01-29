@@ -61,7 +61,6 @@ with requests.Session() as s:
             for span_tag in soupReading.findAll('span'):
                 span_tag.replace_with('')
             title = subReading['title']
-            #title = " ".join(re.findall("[a-zA-Z]+", title))
             print('Now Scraping Reading: %s' % title)
             # Grabbing all of the blue boxes which are denoted by "figure" in the HTML
             # Trying to also save them off as word documents, with both text and tables
