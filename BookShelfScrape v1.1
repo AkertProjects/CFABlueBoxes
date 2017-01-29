@@ -70,7 +70,9 @@ with requests.Session() as s:
                 readingFile = open('%s.html' % title, 'wb')
                 for figure in figures:
                     for image_tag in figure.findAll('img'):
-                        image_tag['src'] = 'https://jigsaw.vitalsource.com/books/' + str(book['isbn']) + '/epub/OEBPS/' + image_tag['src']
+                        imageTagRegex = re.compile(r'(\.\.\/)?(images.*)')
+                        trueImageTag = imageTagRegex.search(image_tag['src']).group(2)
+                        image_tag['src'] = 'https://jigsaw.vitalsource.com/books/' + str(book['isbn']) + '/epub/OEBPS/' + trueImageTag
                     readingFile.write(figure.encode('UTF-8'))
                 readingFile.close()
             else:
