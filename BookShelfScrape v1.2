@@ -35,7 +35,7 @@ with requests.Session() as s:
     for book in parsed_Library:
         title = book['title']
         isbn = book['isbn']
-        if str(Year) in title and Level in title:
+        if str(Year) in title and Level in title and 'CFA' in title:
             isbnList.append({'title': title, 'isbn': int(isbn)})
     # Going to each book's table of contents first
     for book in isbnList:
