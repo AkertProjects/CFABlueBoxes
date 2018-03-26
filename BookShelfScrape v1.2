@@ -30,14 +30,13 @@ with requests.Session() as s:
     p = s.post('https://jigsaw.vitalsource.com/login', params=payload)
     Library = p.text
     parsed_Library = json.loads(Library)['books']
-    my_regex = re.compile(str(Year) + r'\sCFA\sLevel\s' + Level + r'\s')
     isbnList = []
     # grabbing all the books to read
     for book in parsed_Library:
         title = book['title']
         isbn = book['isbn']
-        if my_regex.search(title):
-            isbnList.append({'title':title, 'isbn':int(isbn)})
+        if str(Year) in title and Level in title:
+            isbnList.append({'title': title, 'isbn': int(isbn)})
     # Going to each book's table of contents first
     for book in isbnList:
         bookUrl = 'https://jigsaw.vitalsource.com/books/' + str(book['isbn']) + '/toc'
@@ -61,7 +60,7 @@ with requests.Session() as s:
             for span_tag in soupReading.findAll('span'):
                 span_tag.replace_with('')
             title = subReading['title']
-            title = " ".join(re.findall("[a-zA-Z0-9.]+", title))
+            #title = " ".join(re.findall("[a-zA-Z]+", title))
             print('Now Scraping Reading: %s' % title)
             # Grabbing all of the blue boxes which are denoted by "figure" in the HTML
             # Trying to also save them off as word documents, with both text and tables
@@ -70,13 +69,12 @@ with requests.Session() as s:
                 readingFile = open('%s.html' % title, 'wb')
                 for figure in figures:
                     for image_tag in figure.findAll('img'):
-                        imageTagRegex = re.compile(r'(\.\.\/)?(images.*)')
-                        trueImageTag = imageTagRegex.search(image_tag['src']).group(2)
-                        image_tag['src'] = 'https://jigsaw.vitalsource.com/books/' + str(book['isbn']) + '/epub/OEBPS/' + trueImageTag
+                        image_tag['src'] = 'https://jigsaw.vitalsource.com/books/' + str(book['isbn']) + '/epub/OEBPS/' + image_tag['src']
                     readingFile.write(figure.encode('UTF-8'))
                 readingFile.close()
             else:
                 continue
-    print('Done! Enjoy!')
+        print('Book {} Done! Enjoy!'.format(book))
+    print('All books for year {0} and Level {1} done! Enjoy!'.format(Year, Level))
 
 
