@@ -1,5 +1,5 @@
 #! Python
-# Grabs End of Chapter questions and answers from vitalsource
+# Modded to grab EOC questions from CFA books
 
 import requests, json, re, os
 from bs4 import BeautifulSoup
@@ -69,6 +69,7 @@ with requests.Session() as s:
                 for image_tag in eoc.findAll('img'):
                     image_tag['src'] = 'https://jigsaw.vitalsource.com/books/' + str(book['isbn']) + '/epub/OEBPS/' + image_tag[
                         'src']
+                    image_tag['width'] = "100%"
                 readingFile.write(eoc.encode('UTF-8'))
                 readingFile.close()
             else:
