@@ -1,0 +1,78 @@
+#! Python
+# Modded to grab EOC questions from CFA books
+
+import requests, json, re, os
+from bs4 import BeautifulSoup
+
+username = input('Please type in your E-mail:')
+password = input('Please type in your password:')
+
+# Provide username and password
+payload = {
+    'user[email]': username,
+    'user[password]': password
+}
+
+# Specifying year and level of books
+Year = input('What year of books do you want?: ')
+Level = input('What Level? (I,II,III): ')
+
+# Creating a folder for the documents
+startingLocation = os.path.abspath(os.curdir)
+location = startingLocation + '\CFAEOC'
+if not os.path.exists(location):
+    os.makedirs(location)
+os.chdir(location)
+print('ALL FILES WILL BE SAVED IN: %s' % location)
+
+# Logging in and keeping a session open
+with requests.Session() as s:
+    p = s.post('https://jigsaw.vitalsource.com/login', params=payload)
+    Library = p.text
+    parsed_Library = json.loads(Library)['books']
+    isbnList = []
+    # grabbing all the books to read
+    for book in parsed_Library:
+        title = book['title']
+        isbn = book['isbn']
+        if str(Year) in title and Level in title and 'CFA' in title:
+            isbnList.append({'title': title, 'isbn': int(isbn)})
+    # Going to each book's table of contents first
+    for book in isbnList:
+        bookUrl = 'https://jigsaw.vitalsource.com/books/' + str(book['isbn']) + '/toc'
+        tableOfContents = s.get(bookUrl).text
+        parsed_tableOfContents = json.loads(tableOfContents)
+        readingList = []
+        readingRegex = re.compile(r'Reading\s{1,10}\d{1,3}')
+        newLocation = startingLocation + '\CFAEOC' + r'\ ' + book['title']
+        if not os.path.exists(newLocation):
+            os.makedirs(newLocation)
+        os.chdir(newLocation)
+        # Grabbing the links to all of the readings
+        for reading in parsed_tableOfContents:
+            if readingRegex.search(reading['title']):
+                readingList.append(reading)
+        for subReading in readingList:
+            newLink = subReading['path']
+            newURL = 'https://jigsaw.vitalsource.com/books/' + str(book['isbn']) + '/epub' + str(newLink)
+            reading = s.get(newURL).text
+            soupReading = BeautifulSoup(reading, "html.parser")
+            for span_tag in soupReading.findAll('span'):
+                span_tag.replace_with('')
+            title = subReading['title']
+            #title = " ".join(re.findall("[a-zA-Z]+", title))
+            print('Now Scraping Reading: %s' % title)
+            # Grabbing all of the blue boxes which are denoted by "figure" in the HTML
+            eoc = soupReading.find("section", {'id': re.compile('chap\d{1,2}-ProbsAndSolutions')})
+            if eoc is not None:
+                readingFile = open('%s.html' % title, 'wb')
+                for image_tag in eoc.findAll('img'):
+                    image_tag['src'] = 'https://jigsaw.vitalsource.com/books/' + str(book['isbn']) + '/epub/OEBPS/' + image_tag[
+                        'src']
+                    image_tag['width'] = "100%"
+                readingFile.write(eoc.encode('UTF-8'))
+                readingFile.close()
+            else:
+                continue
+        print('Book {} Done! Enjoy!'.format(book))
+    print('All books for year {0} and Level {1} done! Enjoy!'.format(Year, Level))
