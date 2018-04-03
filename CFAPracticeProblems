@@ -62,7 +62,7 @@ with requests.Session() as s:
             title = subReading['title']
             #title = " ".join(re.findall("[a-zA-Z]+", title))
             print('Now Scraping Reading: %s' % title)
-            # Grabbing all of the blue boxes which are denoted by "figure" in the HTML
+            # Grabbing the practice problems which are denoted by "chap(chapter)-ProbsAndSolutions"
             eoc = soupReading.find("section", {'id': re.compile('chap\d{1,2}-ProbsAndSolutions')})
             if eoc is not None:
                 readingFile = open('%s.html' % title, 'wb')
